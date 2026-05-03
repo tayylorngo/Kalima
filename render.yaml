@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: kalima
+    name: kalima-app
     runtime: node
     plan: free
     region: oregon
