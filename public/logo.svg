@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kalima">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#13606d"/>
+      <stop offset="1" stop-color="#0a3f4a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="32" fill="url(#g)"/>
+  <path d="M32 12 C 42 22, 42 42, 32 52 C 22 42, 22 22, 32 12 Z" fill="#d4a76a"/>
+  <line x1="32" y1="12" x2="32" y2="52" stroke="#0a3f4a" stroke-width="1.4" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="2" fill="#0a3f4a"/>
+</svg>

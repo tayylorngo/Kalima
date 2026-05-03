@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: kalima
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm ci
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SITE_PASSWORD
+        sync: false

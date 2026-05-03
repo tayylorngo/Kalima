@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kalima — report card comment assistant</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main>
+      <header class="brand">
+        <a class="brand-link" href="/">
+          <img src="/logo.svg" alt="" class="brand-mark" />
+          <span class="brand-name">Kalima</span>
+        </a>
+        <p class="tagline">A thoughtful comment for every student.</p>
+      </header>
+
+      <form id="form" class="card">
+        <button
+          type="button"
+          class="collapse-btn"
+          id="collapse-btn"
+          aria-label="Hide form"
+          title="Hide form"
+        >✕</button>
+
+        <label class="field">
+          <span class="field-label">Describe the student</span>
+          <textarea
+            id="description"
+            name="description"
+            rows="4"
+            placeholder="e.g. The student participates eagerly in class discussions and supports their peers, but struggles to organize their writing and rarely revises. Strong reader."
+            maxlength="4000"
+            required
+          ></textarea>
+          <p class="field-hint">
+            Do not enter student names, ID numbers, or other identifying
+            information. Use “the student” or initials.
+          </p>
+        </label>
+
+        <div id="pii-warning" class="pii-warning" hidden role="alert">
+          <strong>Possible name detected.</strong>
+          Replace it with “the student” or initials before submitting.
+        </div>
+
+        <label class="checkbox-field">
+          <input type="checkbox" id="regents" name="regents" />
+          <span>Course ends in a Regents exam <small>(auto-adds #502)</small></span>
+        </label>
+
+        <button id="submit" type="submit">Suggest comments</button>
+
+        <div class="card-summary">
+          <span class="summary-label">For:</span>
+          <span class="summary-text" id="summary-text"></span>
+          <button type="button" class="edit-btn" id="edit-btn">Edit</button>
+        </div>
+      </form>
+
+      <section id="loading" class="loading-state" hidden aria-live="polite">
+        <div class="loading-logo" aria-hidden="true">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#13606d" />
+                <stop offset="1" stop-color="#0a3f4a" />
+              </linearGradient>
+            </defs>
+            <circle cx="32" cy="32" r="32" fill="url(#lg)" />
+            <path
+              class="loading-leaf"
+              d="M32 12 C 42 22, 42 42, 32 52 C 22 42, 22 22, 32 12 Z"
+              fill="#d4a76a"
+            />
+            <line
+              x1="32"
+              y1="12"
+              x2="32"
+              y2="52"
+              stroke="#0a3f4a"
+              stroke-width="1.4"
+              stroke-linecap="round"
+            />
+          </svg>
+        </div>
+        <p class="loading-text" id="loading-text">Reading your description</p>
+      </section>
+
+      <section id="results" class="results" hidden>
+        <h2>Suggested comments</h2>
+        <ol id="suggestions"></ol>
+      </section>
+
+      <section id="error" class="error" hidden></section>
+    </main>
+
+    <button
+      type="button"
+      id="help-btn"
+      class="help-btn"
+      aria-label="Help"
+      title="Help"
+    >?</button>
+
+    <div id="help" class="help" hidden role="dialog" aria-labelledby="help-title">
+      <div class="help-card">
+        <button
+          type="button"
+          class="help-close"
+          id="help-close"
+          aria-label="Close"
+        >✕</button>
+        <h2 id="help-title" class="help-title">Using Kalima</h2>
+        <p class="help-intro">
+          Describe a student in plain words and Kalima suggests pre-approved
+          comment codes that fit. Below are tips for getting the best picks.
+        </p>
+
+        <h3 class="help-h3">How to write a good description</h3>
+        <ul class="help-list">
+          <li>Mention <strong>strengths and growth areas</strong>. Balanced descriptions get balanced suggestions.</li>
+          <li>Be <strong>specific</strong> — name the subject, grade, and concrete behaviors.</li>
+          <li>Vague descriptions like “good student, works hard” return vague comments.</li>
+          <li>Check the <strong>Regents box</strong> if the course ends in a Regents exam — #502 will be auto-added.</li>
+          <li>Click <strong>“See why”</strong> on any card to read why that code was chosen.</li>
+          <li>Don’t love a pick? Click <strong>Edit</strong> on the description and resubmit — you’ll get a fresh set.</li>
+        </ul>
+
+        <h3 class="help-h3">Example descriptions</h3>
+
+        <div class="help-example">
+          <span class="help-tag">Math</span>
+          <p>9th grade Algebra 1. Strong on linear equations and graphing, but rushes word problems and skips showing work.</p>
+        </div>
+
+        <div class="help-example">
+          <span class="help-tag">ELA</span>
+          <p>5th grader. Reads above grade level and joins discussions enthusiastically, but writing lacks structure and revision is rushed.</p>
+        </div>
+
+        <div class="help-example">
+          <span class="help-tag">Science</span>
+          <p>Earth Science, 9th grade. Lab work is careful and accurate, but struggles to explain results in writing. Misses lab make-ups.</p>
+        </div>
+
+        <div class="help-example">
+          <span class="help-tag">Behavior</span>
+          <p>Consistently kind to classmates and helpful in groups, but frequently distracted by phone during independent work.</p>
+        </div>
+
+        <p class="help-foot">
+          Once you have suggestions, click the code badge’s <strong>Copy code</strong> button to grab the number for your gradebook.
+        </p>
+      </div>
+    </div>
+
+    <div id="ack" class="ack" hidden role="dialog" aria-labelledby="ack-title">
+      <div class="ack-card">
+        <img src="/logo.svg" alt="" class="ack-mark" />
+        <h2 id="ack-title" class="ack-title">Before you start</h2>
+        <p class="ack-sub">
+          Kalima sends your description to a Google AI service to suggest comment codes. Please follow these rules so student data stays protected.
+        </p>
+        <ul class="ack-list">
+          <li><strong>No names</strong> — use “the student” or initials.</li>
+          <li><strong>No student ID numbers</strong> or contact info.</li>
+          <li><strong>No medical, family, or disciplinary details</strong> that could identify a specific student.</li>
+          <li>Describe behaviors, skills, and habits — not the person.</li>
+        </ul>
+        <button type="button" class="ack-btn" id="ack-btn">
+          I understand
+        </button>
+      </div>
+    </div>
+
+    <div id="lock" class="lock" hidden>
+      <div class="lock-card">
+        <img src="/logo.svg" alt="" class="lock-mark" />
+        <h2 class="lock-title">Kalima</h2>
+        <p class="lock-sub">Enter the staff password to continue.</p>
+        <form id="lock-form" class="lock-form">
+          <input
+            id="lock-password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Password"
+            required
+            autofocus
+          />
+          <button type="submit">Unlock</button>
+        </form>
+        <p id="lock-error" class="lock-error" hidden></p>
+      </div>
+    </div>
+
+    <script src="/pii.js"></script>
+    <script src="/script.js"></script>
+  </body>
+</html>
