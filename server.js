@@ -14,6 +14,17 @@ const COMMENTS = JSON.parse(
 const COMMENTS_BY_CODE = new Map(COMMENTS.map((c) => [c.code, c]));
 const REGENTS_CODE = 502;
 
+// Filter out non-English (Spanish) catalog entries from the pool we send to
+// Gemini. Teachers want English suggestions only — the original NYC catalog
+// includes Spanish translations (codes 601–616 etc.) which the model would
+// otherwise pick. We keep them in COMMENTS_BY_CODE so #502 etc. still resolve,
+// but never offer them as candidates.
+const SPANISH_RE = /\b(que|una|del|para|por|tiene|hacer|este|esta|aprovechamiento|esfuerzo|falta|preparacion|escolar|escolares|asistir|llame|cita|baja|deficientes|excesivas|excesivos|tareas|incompletas|interrumpe|distrae|comportamiento|habilidad|habitos|gran|exceso|insuficiente|ausencias|tardanzas|calificacion|adelanto|progresar|debe|interes|excelente|participacion|demuestra|sin|razon|examenes|excelente|insuficiente)\b/i;
+const ENGLISH_COMMENTS = COMMENTS.filter((c) => {
+  const text = `${c.comment || ''} ${c.indicator || ''}`;
+  return !SPANISH_RE.test(text);
+});
+
 const MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
 const MAX_DESCRIPTION_CHARS = 4000;
 
@@ -185,8 +196,8 @@ app.post('/api/suggest', suggestLimiter, requireAuth, async (req, res) => {
   const modelPickCount = wantRegents ? 5 : 6;
 
   const pool = wantRegents
-    ? COMMENTS.filter((c) => c.code !== REGENTS_CODE)
-    : COMMENTS;
+    ? ENGLISH_COMMENTS.filter((c) => c.code !== REGENTS_CODE)
+    : ENGLISH_COMMENTS;
 
   const catalog = pool
     .map(
@@ -321,7 +332,9 @@ app.post('/api/suggest', suggestLimiter, requireAuth, async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Kalima running on port ${PORT}`);
-  console.log(`Loaded ${COMMENTS.length} comments.`);
+  console.log(
+    `Loaded ${COMMENTS.length} comments (${ENGLISH_COMMENTS.length} English, ${COMMENTS.length - ENGLISH_COMMENTS.length} non-English filtered out of the pool).`
+  );
   if (process.env.SITE_PASSWORD) {
     console.log('Password protection: ON');
   } else {

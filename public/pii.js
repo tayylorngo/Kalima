@@ -1003,12 +1003,18 @@
     ) {
       return true;
     }
-    // Plural -s on a base that's in our dictionary
-    if (word.endsWith('s') && word.length > 4) {
+    // Plural / 3rd-person singular -s on a base that's in our dictionary
+    if (word.endsWith('s') && word.length >= 4) {
       const base = word.slice(0, -1);
       if (COMMON_WORDS.has(base) || ALLOW.has(base)) return true;
-      const baseEs = word.slice(0, -2);
-      if (word.endsWith('es') && (COMMON_WORDS.has(baseEs) || ALLOW.has(baseEs))) return true;
+      if (word.endsWith('es') && word.length >= 5) {
+        const baseEs = word.slice(0, -2);
+        if (COMMON_WORDS.has(baseEs) || ALLOW.has(baseEs)) return true;
+      }
+      if (word.endsWith('ies') && word.length >= 5) {
+        const baseY = word.slice(0, -3) + 'y';
+        if (COMMON_WORDS.has(baseY) || ALLOW.has(baseY)) return true;
+      }
     }
     return false;
   }
