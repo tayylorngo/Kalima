@@ -314,6 +314,45 @@
     'tone','voice','focus','concentration','motivation','confidence',
     'comprehension','reasoning','logic','analysis','argument','evidence',
     'expression','pronunciation','fluency','accuracy',
+    // Common adjective sentence-openers (teachers describing students)
+    'strong','weak','excellent','outstanding','exceptional','poor','good',
+    'great','bright','sharp','smart','clever','talented','gifted','brilliant',
+    'capable','able','ambitious','creative','curious','dedicated','dependable',
+    'determined','enthusiastic','friendly','generous','genuine','gracious',
+    'hardworking','helpful','honest','humble','intelligent','kind','modest',
+    'optimistic','patient','persistent','polite','positive','punctual',
+    'reliable','respectful','responsible','sincere','sociable','supportive',
+    'sympathetic','thoughtful','trustworthy','careful','careless','dishonest',
+    'disrespectful','disruptive','distracted','frustrated','immature',
+    'impatient','impulsive','inattentive','inconsistent','lazy','restless',
+    'rude','shy','stubborn','struggling','tardy','withdrawn','quiet','loud',
+    'active','passive','attentive','focused','organized','disorganized',
+    'prepared','unprepared','motivated','unmotivated','confident','outgoing',
+    'reserved','mature','quick','slow','methodical','consistent','thorough',
+    'energetic','able','unable','willing','unwilling','engaged','disengaged',
+    'eager','bored','interested','disinterested','independent','dependent',
+    'cooperative','collaborative','competitive','creative','imaginative',
+    'analytical','logical','critical','reflective','responsive','flexible',
+    'adaptable','resilient','resourceful','efficient','effective',
+    // Common sentence-starting verbs in descriptions
+    'needs','requires','lacks','demonstrates','exhibits','displays','shows',
+    'tries','attempts','strives','works','does','did','keeps','continues',
+    'completed','completes','finishes','finished','fails','succeeds','seeks',
+    'asks','answers','reads','writes','speaks','listens','participates',
+    'contributes','engages','focuses','struggles','excels','improves',
+    'improved','progressed','progresses','gets','got','arrives','arrived',
+    'started','began','begins','tries','tried','should','must','could','may',
+    'might','will','would','can','cannot',
+    // Common adverb / transition openers
+    'hopefully','clearly','apparently','obviously','frequently','rarely',
+    'occasionally','periodically','seldom','barely','hardly','nearly',
+    'almost','probably','possibly','likely','unlikely','definitely',
+    'absolutely','really','truly','genuinely','simply','merely','just',
+    'still','already','yet','also','besides','moreover','furthermore',
+    'additionally','instead','rather','otherwise','therefore','thus',
+    'consequently','accordingly','meanwhile','meantime','overall',
+    'altogether','briefly','specifically','particularly','especially',
+    'notably','remarkably','surprisingly','unfortunately','fortunately',
   ]);
 
   // Words that are also names but appear far more often as common English.
@@ -436,6 +475,46 @@
       if (!ALLOW.has(m[1].toLowerCase()) && !ALLOW.has(m[2].toLowerCase())) {
         return { found: true, sample: `${m[1]} ${m[2]}`, kind: 'full-name' };
       }
+    }
+
+    // Capitalized + name-verb at sentence start — catches names not in the
+    // dictionary, e.g. "Lobar is bright", "Zumrad tries hard". Excludes
+    // allow-listed openers (Today, Recently, Math, etc.) and ambiguous
+    // English-collision words (Mark, Will, etc. — those have their own check
+    // above with stricter rules).
+    const nameVerb = new RegExp(
+      '(?:^|[.!?]\\s+)([A-Z][a-z]{1,15})\\s+' +
+        '(?:is|was|has|had|seems|seemed|tries|tried|works|worked|reads|read|' +
+        'writes|wrote|likes|loves|enjoys|enjoyed|struggles|struggled|excels|' +
+        'excelled|completed|completes|finishes|finished|earned|earns|' +
+        'received|asked|asks|answered|answers|understands|understood|' +
+        'comprehends|improved|improves|started|began|gets|got|appears|shows|' +
+        'showed|demonstrates|demonstrated|participates|participated|' +
+        'contributes|contributed|engages|engaged|tends|tended|consistently|' +
+        'always|often|never|sometimes|completed|attempted|attempts|spoke|' +
+        'speaks|talks|talked|asked|asks|sits|sat|stands|stood|finishes|' +
+        'reads|wrote|writes|comes|came|goes|went|did|does|will|would|can|' +
+        'could|should|might|may)\\b',
+      'g'
+    );
+    while ((m = nameVerb.exec(text)) !== null) {
+      const w = m[1];
+      const lower = w.toLowerCase();
+      if (ALLOW.has(lower)) continue;
+      if (AMBIGUOUS_NAMES.has(lower)) continue; // already handled above
+      return { found: true, sample: w, kind: 'name' };
+    }
+
+    // Capitalized at sentence start followed by name-style punctuation —
+    // catches "Lobar.", "Lobar,", "Lobar — kind to peers".
+    const startPunct =
+      /(?:^|[.!?]\s+)([A-Z][a-z]{1,15})(?=\s*(?:[,.;:!?\-—–]|$))/g;
+    while ((m = startPunct.exec(text)) !== null) {
+      const w = m[1];
+      const lower = w.toLowerCase();
+      if (ALLOW.has(lower)) continue;
+      if (AMBIGUOUS_NAMES.has(lower)) continue;
+      return { found: true, sample: w, kind: 'name' };
     }
 
     return { found: false };
