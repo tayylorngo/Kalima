@@ -280,7 +280,7 @@ form.addEventListener('submit', async (e) => {
   }
   const pii = detectPII(description);
   if (pii.found) {
-    updatePiiWarning();
+    showPiiWarning(pii);
     const label = PII_LABELS[pii.kind] || 'identifying info';
     showError(
       `Submission blocked: looks like a ${label} (“${pii.sample}”). Remove it, then try again.`
@@ -317,8 +317,8 @@ form.addEventListener('submit', async (e) => {
 
     const data = await res.json();
     if (!res.ok) {
-      if (data.pii) {
-        updatePiiWarning();
+      if (data.pii && data.sample) {
+        showPiiWarning({ kind: data.kind || 'name', sample: data.sample });
         piiWarning.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
       showError(data.error || `Request failed (${res.status}).`);
@@ -442,24 +442,18 @@ const PII_LABELS = {
   'name': 'name',
 };
 
-function updatePiiWarning() {
-  if (!detectPII) return;
-  const result = detectPII(descEl.value);
-  if (result.found) {
-    const label = PII_LABELS[result.kind] || 'identifying info';
-    piiWarning.hidden = false;
-    piiWarning.innerHTML =
-      '<strong>Possible ' + label + ' detected (“' +
-      escapeHtml(result.sample) +
-      '”).</strong> ' +
-      'Remove it before submitting. Submission is blocked until removed.';
-    submitBtn.disabled = true;
-    submitBtn.title = 'Remove the ' + label + ' to enable submission.';
-  } else {
-    piiWarning.hidden = true;
-    submitBtn.disabled = false;
-    submitBtn.title = '';
-  }
+function showPiiWarning(result) {
+  const label = PII_LABELS[result.kind] || 'identifying info';
+  piiWarning.hidden = false;
+  piiWarning.innerHTML =
+    '<strong>Possible ' + label + ' detected (“' +
+    escapeHtml(result.sample) +
+    '”).</strong> ' +
+    'Remove it before submitting.';
+}
+
+function clearPiiWarning() {
+  piiWarning.hidden = true;
 }
 
 function escapeHtml(s) {
@@ -468,7 +462,9 @@ function escapeHtml(s) {
   })[c]);
 }
 
-descEl.addEventListener('input', updatePiiWarning);
+// Hide the warning the moment the user starts editing again, so they can
+// retry without it lingering. PII detection itself only runs on submit.
+descEl.addEventListener('input', clearPiiWarning);
 
 initAuth();
 maybeShowAck();
