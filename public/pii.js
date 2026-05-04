@@ -412,6 +412,20 @@
       return { found: false };
     }
 
+    // Long digit sequences = likely student IDs (NYC OSIS is 9 digits) or
+    // phone numbers. 6+ digits avoids false positives on years (4) and
+    // grades/scores (1–3).
+    const idMatch = /\b\d{6,}\b/.exec(text);
+    if (idMatch) {
+      return { found: true, sample: idMatch[0], kind: 'id-number' };
+    }
+
+    // Email addresses
+    const emailMatch = /\b[\w.+-]+@[\w-]+\.[\w.-]+\b/.exec(text);
+    if (emailMatch) {
+      return { found: true, sample: emailMatch[0], kind: 'email' };
+    }
+
     const tokens = tokenize(text);
 
     for (let i = 0; i < tokens.length; i++) {
@@ -517,7 +531,44 @@
       return { found: true, sample: w, kind: 'name' };
     }
 
+    // Embedded names in long compound tokens — catches bypass attempts like
+    // "marcusisastudent" or "TheStudentMarcusIsHardworking". Scans tokens of
+    // 8+ chars (well above typical English words) for name substrings of
+    // 5+ chars (long enough to avoid common-prefix collisions).
+    for (const t of tokens) {
+      if (t.lower.length < 8) continue;
+      if (ALLOW.has(t.lower)) continue;
+      if (NAMES.has(t.lower)) continue;
+      if (AMBIGUOUS_NAMES.has(t.lower)) continue;
+      const found = findEmbeddedName(t.lower);
+      if (found) {
+        return {
+          found: true,
+          sample: found,
+          kind: 'embedded-name',
+        };
+      }
+    }
+
     return { found: false };
+  }
+
+  function findEmbeddedName(word) {
+    // Look for a name from the dictionary embedded inside `word`. Only
+    // considers names 5+ chars to keep false-positive rate low.
+    for (let len = Math.min(15, word.length); len >= 5; len--) {
+      for (let start = 0; start <= word.length - len; start++) {
+        const sub = word.slice(start, start + len);
+        if (
+          NAMES.has(sub) &&
+          !ALLOW.has(sub) &&
+          !AMBIGUOUS_NAMES.has(sub)
+        ) {
+          return sub;
+        }
+      }
+    }
+    return null;
   }
 
   return { detectPII };

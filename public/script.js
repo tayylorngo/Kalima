@@ -274,11 +274,16 @@ form.addEventListener('submit', async (e) => {
     showError('Please write a longer description.');
     return;
   }
+  if (!detectPII) {
+    showError('Still waking up — please refresh the page in a moment.');
+    return;
+  }
   const pii = detectPII(description);
   if (pii.found) {
     updatePiiWarning();
+    const label = PII_LABELS[pii.kind] || 'identifying info';
     showError(
-      `Submission blocked: looks like a name (“${pii.sample}”). Replace with “the student” or initials, then try again.`
+      `Submission blocked: looks like a ${label} (“${pii.sample}”). Remove it, then try again.`
     );
     descEl.focus();
     piiWarning.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -385,19 +390,71 @@ ackBtn.addEventListener('click', () => {
 
 // Use the shared PII detector loaded from /pii.js. The same logic also runs
 // on the server, so a missing or stale client check can't bypass the rule.
-const detectPII = window.KalimaPII.detectPII;
+// On Render's free tier the service can be cold-starting when the page first
+// loads, which makes /pii.js return a 404. If KalimaPII isn't loaded yet,
+// retry fetching the script a few times before giving up.
+function loadPIIScript() {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = '/pii.js?retry=' + Date.now();
+    s.onload = () => {
+      if (window.KalimaPII && window.KalimaPII.detectPII) resolve();
+      else reject(new Error('KalimaPII still missing after load'));
+    };
+    s.onerror = () => reject(new Error('pii.js failed to load'));
+    document.head.appendChild(s);
+  });
+}
+
+async function ensurePII() {
+  if (window.KalimaPII && window.KalimaPII.detectPII) return;
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      await loadPIIScript();
+      return;
+    } catch (e) {
+      await new Promise((r) => setTimeout(r, 1500 * attempt));
+    }
+  }
+  throw new Error('Server is waking up — please refresh the page in a moment.');
+}
+
+let detectPII = (window.KalimaPII && window.KalimaPII.detectPII) || null;
+if (!detectPII) {
+  ensurePII()
+    .then(() => {
+      detectPII = window.KalimaPII.detectPII;
+    })
+    .catch((err) => {
+      showError(
+        'Server is still waking up. Please refresh the page in a moment.'
+      );
+      console.error(err);
+    });
+}
+
+const PII_LABELS = {
+  'id-number': 'ID number',
+  'email': 'email address',
+  'embedded-name': 'name (embedded in a word)',
+  'name-with-title': 'name',
+  'full-name': 'name',
+  'name': 'name',
+};
 
 function updatePiiWarning() {
+  if (!detectPII) return;
   const result = detectPII(descEl.value);
   if (result.found) {
+    const label = PII_LABELS[result.kind] || 'identifying info';
     piiWarning.hidden = false;
     piiWarning.innerHTML =
-      '<strong>Possible name detected (“' +
+      '<strong>Possible ' + label + ' detected (“' +
       escapeHtml(result.sample) +
       '”).</strong> ' +
-      'Replace with “the student” or initials. Submission is blocked until removed.';
+      'Remove it before submitting. Submission is blocked until removed.';
     submitBtn.disabled = true;
-    submitBtn.title = 'Remove the name to enable submission.';
+    submitBtn.title = 'Remove the ' + label + ' to enable submission.';
   } else {
     piiWarning.hidden = true;
     submitBtn.disabled = false;

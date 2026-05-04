@@ -159,10 +159,20 @@ app.post('/api/suggest', suggestLimiter, requireAuth, async (req, res) => {
   }
   const pii = detectPII(description);
   if (pii.found) {
+    const labels = {
+      'id-number': 'an ID number',
+      'email': 'an email address',
+      'embedded-name': 'a name (embedded in a word)',
+      'name-with-title': 'a name',
+      'full-name': 'a name',
+      'name': 'a name',
+    };
+    const what = labels[pii.kind] || 'identifying information';
     return res.status(400).json({
-      error: `Your description appears to contain a name (“${pii.sample}”). Replace it with “the student” or initials before submitting.`,
+      error: `Your description appears to contain ${what} (“${pii.sample}”). Remove it before submitting.`,
       pii: true,
       sample: pii.sample,
+      kind: pii.kind,
     });
   }
   if (!process.env.GEMINI_API_KEY) {
