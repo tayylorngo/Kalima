@@ -355,6 +355,400 @@
     'notably','remarkably','surprisingly','unfortunately','fortunately',
   ]);
 
+  // Common English vocabulary. Used to spot lowercase rare names that appear
+  // in name-position contexts (after "named", "to", "with", etc.) — anything
+  // not in this list AND not in NAMES is treated as a suspected name.
+  // Built from: (a) the actual comment-template catalog (so all teacher
+  // vocabulary is covered) and (b) ~2000 most common English words.
+  const COMMON_WORDS_RAW = (
+    // From the comment-template catalog (every word teachers might naturally
+    // use — proven domain vocabulary).
+    'ability able about absent abstractly academic accept accepts access ' +
+    'accords accounts accuracy accurate accurately achieve achieved acids ' +
+    'acknowledging actions activities activity adapting add added ' +
+    'addition additional address addressing adelanto adjectives advance ' +
+    'advanced adverbs age aiding air algebraic algebraically all aloud ' +
+    'alternate american among analysis analyze analyzes analyzing and ' +
+    'angle angles answer anticipates any applications applies apply ' +
+    'applying appointment approach approaches appropriate appropriately ' +
+    'aprovechamiento aptitude arc are area areas argument arguments arise ' +
+    'arithmetic art arts asistir ask asking asks aspects assess assessing ' +
+    'assessment assessments assigned assignments assistance associated ' +
+    'astronomy atomic attempt attempts attend attention attitude ' +
+    'attributes audience audiences audio ausencias author authoritative ' +
+    'authors available avoiding aware baja band based bases basic ' +
+    'behaviors being best better between biases biotechnology body ' +
+    'bonding both broaden building builds calculating calificacion call ' +
+    'capitalization careers carrying cases categorical causally cause ccr ' +
+    'cell central challenges challenging chance chapter character ' +
+    'characters charts chat chemical chemistry choice choices chosen ' +
+    'circle circles circumstance cita citation citations cite citing ' +
+    'claim claims clarification clarifying clase class classifying ' +
+    'classroom clear clearly climax closely clues coherent collaborate ' +
+    'collaborations collaborative collaboratively command common ' +
+    'communicating communication community comparative comparatively ' +
+    'compare comparing comparison complete completed completes completing ' +
+    'complex complexity components composing composition compositional ' +
+    'compound comprehend comprehending comprehension compute con concept ' +
+    'concepts concern concerns concisely concluding conclusions concrete ' +
+    'conditional conduct conducting cones conferencing confidence ' +
+    'congruence conic connect connecting connection connections ' +
+    'connotative consequences consistency consistent consistently ' +
+    'constructing constructions contact containing content context ' +
+    'contexts continued contrasting contribute contributes control ' +
+    'conventions conversations convey cooperation cooperative coordinates ' +
+    'correspondences corroborating could count counterclaims counting ' +
+    'course crafting create creating creation creative creativity ' +
+    'credibility critical critiques cross culminates cultural cumulative ' +
+    'current cut cylinders dance data deadlines debe decimals decision ' +
+    'decisions deepen deficientes defines defining definition definitions ' +
+    'delineating demonstrates demonstrating demuestra denominators ' +
+    'dependent describe described describing description despite detail ' +
+    'details determine determining develop developing development devices ' +
+    'dialogue diaria did differences different differing difficulty digit ' +
+    'digital digits dimensional directions directly discipline ' +
+    'discrepancies discussing discussion discussions display displays ' +
+    'disrespectful distinguish distinguishing distracts distributions ' +
+    'diverse divide divided dividing division documents does doing domain ' +
+    'domains drama draw drawing drawn during each earth ecology editing ' +
+    'educational effect effective effectively effects efficiently effort ' +
+    'elaboration electricity element elements emphasize encourage ' +
+    'encouragement end energy engaged engagement engages english enhance ' +
+    'enjoyment ensemble environment equation equations equilibrium ' +
+    'equivalence equivalent escolares esfuerzo essays establish ' +
+    'established evaluate evaluating evaluation event events everyday ' +
+    'evidence evolution exam examenes examine examples exams exceed ' +
+    'exceeding exceeds excelente excellent exceso excessive excessively ' +
+    'existing expanding expected experience experienced experiences ' +
+    'experimentation experimenting experiments explain explaining ' +
+    'explanation explanations explanatory explicitly exponential ' +
+    'exponents exposition expressed expressing expression expressions ' +
+    'extended extending extent faction factors facts failed fairly ' +
+    'fairness falta family features federalist feedback feelings few ' +
+    'field figurative figure figures find finding findings fitness ' +
+    'fitnessgram fits flow fluency fluent focused focusing follow ' +
+    'following follows for force form format formats formatting forms ' +
+    'formulas foundational four fraction fractions frequently from fully ' +
+    'function functions further furthering furthers gain gained games ' +
+    'gather gathered gathering general generalizations generalizing ' +
+    'generate generated genetics genres geometric geometrical geometry ' +
+    'goal goals good grade grades grammar gran graphic graphical ' +
+    'graphically graphics graphs greater habilidad habitos hacer harder ' +
+    'harmful has have headings health healthy help heredity hesitates ' +
+    'high highly historical history home homeostasis homework honor how ' +
+    'human hundredths idea ideas identify identifying identities ' +
+    'illustrations imagined immunity impact implement important improve ' +
+    'improved improvement improvisation improvisational inactivity ' +
+    'inattentive include includes including incompletas incomplete ' +
+    'inconsistent increase independence independent independently ' +
+    'indicates individual individuals inequalities inferences influence ' +
+    'influences informal information informational informative ' +
+    'infrequently initiative inquiry insights insolation insufficient ' +
+    'insuficiente integer integrate integrating interact interaction ' +
+    'interactions interactive interes internet interpret interpreting ' +
+    'interprets interrumpe into introduce introducing introduction ' +
+    'introductions investigating investigation involving irrational issue ' +
+    'issues its jeopardy journals justifying key keyboarding kinematics ' +
+    'kinetics knowing knowledge knowledgeable known knows lab labs land ' +
+    'landscapes language larger late learning least leaves length lengths ' +
+    'lesson letter letters level life like limitations limited linear ' +
+    'lines link linking listening literary literature live llame locate ' +
+    'logical logically looking low made madison magnetism main maintain ' +
+    'maintaining major make makes making management many maps masterworks ' +
+    'mastery matching materials mathematical mathematics matrices matter ' +
+    'matters mean meaning meanings meant measure measurement measurements ' +
+    'mechanics media mediums meet meeting meets members message messages ' +
+    'meteorology minerals missing model modeling models modern moral more ' +
+    'most motion motions motivated movement movements multi multimedia ' +
+    'multiple multiples multiplication multiply multiplying music musical ' +
+    'must names narration narratives narrator narrow nature navigating ' +
+    'need needed needs never new nonverbal not notation notebook notes ' +
+    'noting nouns nuclear number numbers numerical nyc objects ' +
+    'observation observational obtained obtaining often one ongoing only ' +
+    'operations opinion opinions opportunities opposing options oral ' +
+    'orally order ordering organic organization organizational organize ' +
+    'organized organizes organizing other others out outcomes over ' +
+    'overall overreliance own oxidation pairs papers para paragraphs ' +
+    'parallel part participacion participate participates participating ' +
+    'particular pass patterns pay pays peers perform performance ' +
+    'performances performing period periodic periodicity periodization ' +
+    'persevering persist persists personal persuasively phenomena phone ' +
+    'photographs phrases physical physics pieces place plagiarism plane ' +
+    'planning plays playwriting plot point pointing points political ' +
+    'polynomial polynomials poor population populations portions positive ' +
+    'possesses possible precedes precise predict prefix premises ' +
+    'preparacion prepared present presentations presented presenting ' +
+    'presents previous primary principles print probabilities probability ' +
+    'problem problems procedures process processes produce producing ' +
+    'products proficiently program programa progresar progress project ' +
+    'projects promote properties property proportional prove provide ' +
+    'proving publish punctuation purpose purposes pythagorean qualitative ' +
+    'quality quantitative quantitatively quantities question questions ' +
+    'quickly quotations quote radicals random range ratio rational ratios ' +
+    'razon reach reaches read reader reading readings real really ' +
+    'reasonable reasoning reasons recalling recommended recount reduction ' +
+    'reference refines refining reflected reflection regarding regents ' +
+    'regularly relate related relating relationship relationships ' +
+    'relevant remote repertoire repetition rephrasing reported reports ' +
+    'represent representations representative representing reproduction ' +
+    'required requirements requires research resolution resources respect ' +
+    'respectful respecting respects respond responding responds response ' +
+    'responsibility responsible results revises revising rewriting ' +
+    'rhetoric rhetorical right rigid risks rocks roll routines rules same ' +
+    'sample sampling satisfactorily satisfactory says scene sci science ' +
+    'sciences scientific scores search searches secondary section ' +
+    'sections sectors select selecting selection selectively self ' +
+    'semester sense sentence sentences sequence sequences sequentially ' +
+    'series services sessions set sets setting settings several shapes ' +
+    'share shared short show shows significance significant similar ' +
+    'similarities similarity similarly simple simultaneous sin single ' +
+    'situation situations skill skills social societies software solo ' +
+    'solve solving sound sounds source sources space speaker speakers ' +
+    'speaking special specific speech spelled spelling spheres spoken ' +
+    'sport sports sportsmanship standard standards stanza stated ' +
+    'statement statistical status stay stays step steps stoichiometry ' +
+    'story strategically strategies strategy strengthen strengthening ' +
+    'strengths stress strives striving strong strongly structure ' +
+    'structured structures struggles student studies style styles subject ' +
+    'submit substantive subtract subtraction sufficient suffix summarize ' +
+    'summarizing summary supervision supplying support supported ' +
+    'supporting supports surface surveys sustained syllables synthesize ' +
+    'synthesizing system systems tables taking talking tardanzas tareas ' +
+    'task tasks technical technique techniques technologies technology ' +
+    'tell term terminates terms tests text texts textual that the theater ' +
+    'their them theme themes theorem theorems there they this thorough ' +
+    'thoroughly thoughts three through throughout tiene time told tone ' +
+    'tools topic topics toward towards tradeoffs transformations ' +
+    'transitions translating transparencies treat treatment treatments ' +
+    'triangles trigonometric trigonometry trying tutorial tutoring two ' +
+    'una uncertain under underlying understand understanding ' +
+    'understandings understands unfamiliar unified uniform unit units ' +
+    'unknown unprepared update usage use used useful uses using utilize ' +
+    'utilizing valid value values variability variable variables variety ' +
+    'various vector vectors verbs video videos view visual visualizations ' +
+    'visualizing visually vocabulary volume water waves way well what ' +
+    'when where which while whilst whole wifi with within word words work ' +
+    'working works world writing written zeros ' +
+    // Top common English words not in the catalog above
+    'after again against ago all almost along already also although ' +
+    'always among another any anything anywhere around because been ' +
+    'before begin behind below beside best better birthday black blue ' +
+    'book born bought box boy break bring brought brown business busy ' +
+    'buy came car care change check child children city close coffee ' +
+    'cold come comes coming computer cool corner cost country couple ' +
+    'cover dad daughter day days deal decide deep dinner door door down ' +
+    'each early easy eat effect either email end enjoy enough enter ' +
+    'every everyone everything everywhere example except eyes face ' +
+    'fact fall family far fast father feel felt few find first five ' +
+    'food foot for forgot found four free friend friends front full ' +
+    'fun get gets getting girl give given go goes going gone got great ' +
+    'green ground group grow guess had hand hands happen happy hard ' +
+    'head hear heard hello her here hers herself high him himself his ' +
+    'hit hold home honestly hope hot hour hours house however idea ' +
+    'imagine including important inside instead interesting into job ' +
+    'just keep kept kid kids kind knew known land language large last ' +
+    'late later law leave left less let letter life light line list ' +
+    'little long looked looking lose lost lots love loved low lunch ' +
+    'made mail main making man maybe meant meet member middle might ' +
+    'mind minute miss money month months morning mother mouth move much ' +
+    'music my name need new news next nice night nights no nobody none ' +
+    'nor north not nothing now number office okay old once one open ' +
+    'opening order our ours ourselves outside over own page paid paper ' +
+    'parents part party passed past pay people perhaps person phone ' +
+    'piece place plan play played please point poor possible power ' +
+    'prefer pretty price probably problem put quite race ran rather ' +
+    'reach ready really reason red reform remember rest right room ' +
+    'round run safe said same saw say scared school sea second see ' +
+    'seem seemed seen send sent series seven several share short ' +
+    'should side simple simply since sit six size sleep small smile ' +
+    'snow some someone something sometimes son song soon south speak ' +
+    'spent stand start station stay stop store story straight street ' +
+    'study sun sure surprised system table take taken talk tall taught ' +
+    'team teach television tell ten than thank that their themselves ' +
+    'then these thing things think third thought today together tomorrow ' +
+    'too took top town tree trees tried try turn turned twice type under ' +
+    'until upon upon used usually very wait walk walked want wanted ' +
+    'warm wash watch water way ways week weekend weeks well went were ' +
+    'what whatever whether which white who whole whom whose why wife ' +
+    'will wind window winter wish without woman women word would write ' +
+    'wrong year years yes yesterday yet you young your yourself ' +
+    // Common feelings, behaviors, character traits
+    'happy sad angry confused worried excited bored proud calm anxious ' +
+    'shy outgoing friendly nervous brave fearful gentle harsh strict ' +
+    'lenient fair unfair patient impatient thoughtful careless reckless ' +
+    'thoughtful kind unkind generous selfish humble arrogant honest ' +
+    'dishonest creative dull bright dim eager reluctant willing helpful ' +
+    'unhelpful supportive critical encouraging discouraging cooperative ' +
+    'uncooperative respectful disrespectful polite rude attentive distracted ' +
+    'curious indifferent enthusiastic apathetic motivated unmotivated ' +
+    'persistent quitting hardworking lazy diligent careless industrious ' +
+    'idle determined wavering reliable unreliable trustworthy untrustworthy ' +
+    'loyal disloyal sincere insincere genuine fake authentic phony ' +
+    'modest boastful confident timid bold cautious reckless risky safe ' +
+    'dangerous tough soft firm flexible rigid stubborn agreeable ' +
+    'disagreeable cooperative competitive collaborative argumentative ' +
+    'peaceful aggressive passive active dynamic static lively dull ' +
+    'energetic tired sleepy alert quiet noisy loud silent calm ' +
+    'fidgety restless still moving stationary mobile fast slow steady ' +
+    'irregular even uneven balanced unbalanced focused unfocused ' +
+    'organized disorganized systematic random chaotic orderly messy ' +
+    'tidy untidy clean dirty neat sloppy careful careless meticulous ' +
+    'sloppy thorough superficial deep shallow profound trivial ' +
+    'serious silly playful solemn cheerful gloomy bright dim sunny ' +
+    'rainy stormy peaceful turbulent rough gentle rough kind harsh ' +
+    'tender hard mild severe gentle rough simple complicated easy ' +
+    'difficult plain fancy ordinary special common rare unique strange ' +
+    'familiar foreign known unknown new old fresh stale modern outdated ' +
+    'hopefully possibly likely unlikely probably perhaps maybe certainly ' +
+    'definitely absolutely partly fully completely barely hardly almost ' +
+    'nearly already still yet anymore much little many few enough ' +
+    'plenty several various varied diverse mixed pure simple complex ' +
+    'great better best worse worst above below higher lower bigger ' +
+    'smaller wider narrower longer shorter taller older younger newer ' +
+    'cleaner messier nicer meaner kinder colder warmer hotter softer ' +
+    'harder darker lighter brighter dimmer louder quieter heavier ' +
+    'lighter ' +
+    // Common base-form English nouns/verbs/adjectives without suffixes
+    // (these wouldn't be caught by the suffix-pattern check)
+    'about above abuse acid across again age agree ahead aim air alike ' +
+    'alive allow alone alter amid angle angry apart area arm army arose ' +
+    'arrow ask aspect attempt avoid awake aware awe awful baby back bad ' +
+    'bag bake bald ball band bank bare bark base bath beam bear beard ' +
+    'beat bed beef beer beg begin bell belt bench bend best bet better ' +
+    'bias big bike bind bird bit bite black blade blame blank blast bleak ' +
+    'bless blew blind block blond blood bloom blue blunt blur boast boat ' +
+    'bold bond bone book boom boot bore born borrow boss both bound bow ' +
+    'bowl box boy brain brake branch brand brave bread break breath ' +
+    'breeze brew brick bride brief bright bring broad broke brought brow ' +
+    'brown brush bug bull bunch burn burst bury bus bush busy buy buzz ' +
+    'cake calf calm came camp cap cape car card care careful cart case ' +
+    'cash cast cat catch cause cave cell cent chain chair chalk champ ' +
+    'chance change charge charm chart chase chat cheap cheat check cheer ' +
+    'cheese chest chew chick chief chill chin chip chirp choice choose ' +
+    'chop chord chose chunk church city civic claim clamp clap class ' +
+    'claw clay clean clear clerk clever click cliff climb cling clip ' +
+    'clock close cloth cloud clown club clue coach coal coast coat ' +
+    'cocoa code coin cold color comb come cone cook cool cope copy core ' +
+    'corn cost couch could count court cover cow crack craft crash ' +
+    'crawl crazy cream creep crew crisp crop cross crowd crown cruel ' +
+    'cruise crumb crush cry cube curl curse curve cushion cut cute dad ' +
+    'daily damp dance dare dark date dawn dead deaf deal dear debt deck ' +
+    'deep deer dense desk dial diamond diary die diet dig dim dine dip ' +
+    'dirt disc dish ditch dive dock dog doll dome done door dot doubt ' +
+    'down dozen drag drain drama draw dread dream dress drew drift drill ' +
+    'drink drip drive drop drove drown drum dry duck due dull dump dusk ' +
+    'dust duty earn ease easy eat eight either elbow elder elect else ' +
+    'empty engine ensure entry envy equal era ever evil exact except ' +
+    'exit exotic expect extra eye fable face fact fade fail faint fair ' +
+    'fairy faith fake fall false fame fan farm fast fat fate fault favor ' +
+    'fear feast feel feet fell felt female fence ferry few field fierce ' +
+    'fight fill film fin final find fine finger finish fire firm first ' +
+    'fish fist fit five fix fizz flag flame flash flat flaw flee flesh ' +
+    'flew flick flight flip float flood floor flour flow fly foam focus ' +
+    'foe fog fold folk fond food fool foot force fork form fort forth ' +
+    'forty foul found four fox frame fraud free fresh friend frog front ' +
+    'frost frown fruit full fun furry gain game gang garlic gate gear ' +
+    'gem gentle germ ghost giant gift girl give given glad glance glare ' +
+    'glass gleam glide globe gloom glory glove glow glue goal goat gold ' +
+    'gone good goose got grab grace grade grain grand grant grape graph ' +
+    'grasp grass grave gray graze great green greet grew grid grief grill ' +
+    'grim grin grind grip groan ground group grow gruff guard guess ' +
+    'guest guide guilt gulf gulp gum gun gut guy gym hail hair half hall ' +
+    'halt hand hang happy hard harm haste hat hate hatred haul have hawk ' +
+    'hay hazard hazy head heal heap hear heart heat heavy hedge heel ' +
+    'help here hero hide high hike hill hint hip hire hive hold hole ' +
+    'holy home hope horn horse host hotel hour house huge human humid ' +
+    'hunt hurry hurt hut idea idle ill image imply inch ink inn inner ' +
+    'inside iron isle issue item jail jaw jazz jet jewel job join joint ' +
+    'joke joy judge juice jump just keen keep kept keyboard kick kid ' +
+    'kill kin kind king kiss knee knew knit knob knock knot know label ' +
+    'labor lack lady lake lamb lame lamp land lane large last late laugh ' +
+    'launch law lay lazy lead leaf lean leap leash leave led ledge left ' +
+    'leg lemon lend less let life lift light line link lion lip list ' +
+    'live load loaf loan local lock log long look loose lord lose loss ' +
+    'lost loud love loyal luck lump lung mad made mail main make male ' +
+    'mall man maze meal mean meat meet melt mend mercy mere merge mess ' +
+    'metal mid mild mile milk mill mind mine mint mist mix mob mode mold ' +
+    'mole mom money month mood moon more most moth move much mud mug muse ' +
+    'mute name near neat neck need needle nerve nest net never new news ' +
+    'next nice nine noble noise none noon nor north nose note now noun ' +
+    'nudge null nurse nut oak obey ocean odd odor old once one only onto ' +
+    'open opera order ought ours own pace pack pad page paid pain pair ' +
+    'palace pale palm panic paper park part path patch peace peak pear ' +
+    'pearl pen people perch petal phase pick pie piece pile pill pine ' +
+    'pink pipe place plain plan plate play plea plot plow plug plum plus ' +
+    'pole pond pool poor pop porch port pose post pot pour power pray ' +
+    'press pride prime print prior prize problem prompt proof prove ' +
+    'pulse punch pure push quick quiet quit race rack radar raft rage ' +
+    'rail rain raise ramp rank rapid rare rash rate raw reach react ' +
+    'read real rear regal reign rein rent rest rib rice rich ride ridge ' +
+    'rim ring rinse riot rip rise risk rival river road roar roast rob ' +
+    'rock rode role roof room root rope rose rot rough round route row ' +
+    'royal rub rude rug ruin rule run rung sad safe sail salt same sand ' +
+    'sang save saw scale scan scar scare scene school scoop scope score ' +
+    'scout scrap screen screw sea seam seat seek seem seen self sell ' +
+    'send sent serve seven shade shake shall shame shape share sharp ' +
+    'shed sheep sheer sheet shelf shell shift shine ship shirt shock ' +
+    'shoe shoot shop shore short shot shout show shut shy sick side sigh ' +
+    'sign silk silly sing sink sip sit six size skate skill skin skip ' +
+    'sky slab slam slap sleep slept slice slide slim slip slot slow ' +
+    'small smart smell smile smith smoke snail snap snow soak soap sob ' +
+    'soft soil sold solid solo some son soon sore sort soul soup south ' +
+    'space spare speak spear speech spell spend spent spice spike spin ' +
+    'spite split spoil spoke spoon sport spot spray spread spring sprout ' +
+    'square stab stage stair stake stale stall stamp stand star stare ' +
+    'start state stay steam steel steep steer stem step stick stiff ' +
+    'still sting stir stomp stone stood stop store stork storm story ' +
+    'stove strap straw stray strict stride strike string strip strive ' +
+    'strode stroke strong struck struggle stub stuck study stuff stump ' +
+    'style sub such sudden suit sum sun sure surf swam swap swarm sweep ' +
+    'sweet swept swift swim swing switch sword take tale talk tall tame ' +
+    'tank tap tape tar task taste team tear tease teen tell tend tense ' +
+    'tent term test text than that them then thick thigh thin thing ' +
+    'think third those though three threw throat throne throng throw ' +
+    'thumb thump thus tide tie tile till tilt time tin tip tire toad ' +
+    'toast today toe toil told toll tomb tone took tool tooth top topic ' +
+    'torch torn toss tour tow tower town toy trace track trade train ' +
+    'trait tramp trap trash treat tree trend trial tribe trick tried ' +
+    'trip troop true trunk trust truth try tube tug tune turn twin twist ' +
+    'two type ugly under undo unit upset urge use vague valley value ' +
+    'van vary vast veer veil vein very vest video view vile vine voice ' +
+    'void vote vow wade wage wait wake walk wall wand want war ward ware ' +
+    'warm warp wash wasp waste watch water wave way weak wear weep went ' +
+    'were west wet whale what wheat wheel when where which while whip ' +
+    'who whole whom whose why wick wide wife wig wild will win wind wine ' +
+    'wing wink wipe wire wise wish with woe wolf woman won wood wool ' +
+    'word wore work world worm worn worse worst worth wound wove wrap ' +
+    'wreck wrist write wrong wrote yacht yard yarn yawn year yell yes ' +
+    'yet yield yoga yoke you young your youth zone zoo trouble issue tone ' +
+    'method effort sense detail intent action belief topic theme matter ' +
+    'piece angle aim chance choice plan fault flaw idea hope nerve ' +
+    'pride shame fault habit habit chore role ground level limit goal ' +
+    'thought title image source target answer reply skill craft tool ' +
+    'system process result effect cause force range scope thrust spirit ' +
+    'tone state stage pace value worth merit guide path step lift ride ' +
+    'lend grant pay owe sell buy lend deal trade gift loan owe ' +
+    // Pronouns and connectives we may have missed
+    'i me mine myself us we our ours ourselves you your yours yourself ' +
+    'he him his himself she her hers herself it its itself they them ' +
+    'their theirs themselves who whom whose which what whose when where ' +
+    'why how whether whenever wherever however ' +
+    // Days, months, time
+    'monday tuesday wednesday thursday friday saturday sunday weekday ' +
+    'weekend january february march april may june july august september ' +
+    'october november december morning afternoon evening night midnight ' +
+    'noon dawn dusk season spring summer fall autumn winter ' +
+    // Common nouns in school descriptions
+    'work job task assignment effort focus time class lesson period ' +
+    'unit chapter test exam quiz score grade mark point points result ' +
+    'results question answer note notes review feedback comment idea ' +
+    'topic theme subject paper essay project writing speech presentation ' +
+    'group team partner classmate student peer teacher tutor parent ' +
+    'guardian principal counselor advisor mentor friend family kid kids '
+  ).split(/\s+/);
+
+  const COMMON_WORDS = new Set(COMMON_WORDS_RAW.filter(Boolean));
+
   // Words that are also names but appear far more often as common English.
   // We only flag them when context strongly suggests they're being used as a
   // name (capitalized AND in the middle of a sentence, or possessive,
@@ -464,6 +858,43 @@
       }
     }
 
+    // Lowercase rare names in name-introducing positions. Catches narrative
+    // bypasses like "she said hi to lobar yesterday" without flagging every
+    // uncommon word a teacher might use. Only triggers when an unknown word
+    // appears *immediately after* a word that typically precedes a person's
+    // name. Each introducer gets its own pass so "paired with sherzod" still
+    // catches "sherzod" even though "paired with" was matched first.
+    const INTRODUCERS = [
+      'named', 'called', 'introduced', 'told', 'asked', 'helped', 'saw',
+      'met', 'greeted', 'spoke', 'talked', 'partnered', 'paired', 'hi',
+      'hello', 'hey', 'with', 'to', 'for', 'from', 'by', 'about',
+      'alongside', 'sat', 'next', 'beside', 'against', 'unlike', 'like',
+    ];
+    for (const intro of INTRODUCERS) {
+      const r = new RegExp('\\b' + intro + '\\s+([a-z]{4,15})\\b', 'gi');
+      let nm;
+      while ((nm = r.exec(text)) !== null) {
+        const candidate = nm[1].toLowerCase();
+        if (looksLikeEnglishWord(candidate)) continue;
+        // Word appears in a name-position and doesn't look like English.
+        return { found: true, sample: nm[1], kind: 'name' };
+      }
+    }
+
+    // Bare lowercase suspect words: also do a sweep for any lowercase 4+ char
+    // word that isn't in our safe lists AND doesn't look like English. This
+    // catches names that appear without an introducer ("the kid lobar tried").
+    for (const t of tokens) {
+      if (t.isCap) continue;
+      if (t.lower.length < 4) continue;
+      if (looksLikeEnglishWord(t.lower)) continue;
+      if (NAMES.has(t.lower)) {
+        return { found: true, sample: t.word, kind: 'name' };
+      }
+      // Not in dictionary, not English-looking — likely a rare name.
+      return { found: true, sample: t.word, kind: 'name' };
+    }
+
     // Fallback: structural patterns for names not in the list.
     // Possessive — "Smithson's notebook"
     const possessive = /\b([A-Z][a-z]{2,15})['’]s\b/g;
@@ -551,6 +982,35 @@
     }
 
     return { found: false };
+  }
+
+  // Returns true if a word "looks like" everyday English. Covers three signals:
+  // (1) it's in our curated dictionaries, (2) it ends in a very common English
+  // suffix (-ing, -ed, -tion, etc.), or (3) it's clearly a school term.
+  // Intentionally lenient — false-flagging real names is acceptable; flagging
+  // adjectives/verbs is not.
+  function looksLikeEnglishWord(word) {
+    if (!word || word.length < 4) return true;
+    if (COMMON_WORDS.has(word)) return true;
+    if (ALLOW.has(word)) return true;
+    if (AMBIGUOUS_NAMES.has(word)) return true;
+    // Common English suffixes — words with these are almost certainly English
+    // verbs, adjectives, or nouns rather than names.
+    if (
+      /(?:ing|ings|ed|er|ers|est|ly|tion|tions|sion|sions|ment|ments|ness|nesses|able|ible|ous|ive|ives|ful|less|ish|ism|ist|ity|ities|ize|ise|ate|ates|ated|ating|ize|ized|izing|ities|ence|ances|ance|ences|ility|ilities|ologies|ology|ography|ic|ics|al|als|ary|aries|ary|ory|ories)$/.test(
+        word
+      )
+    ) {
+      return true;
+    }
+    // Plural -s on a base that's in our dictionary
+    if (word.endsWith('s') && word.length > 4) {
+      const base = word.slice(0, -1);
+      if (COMMON_WORDS.has(base) || ALLOW.has(base)) return true;
+      const baseEs = word.slice(0, -2);
+      if (word.endsWith('es') && (COMMON_WORDS.has(baseEs) || ALLOW.has(baseEs))) return true;
+    }
+    return false;
   }
 
   function findEmbeddedName(word) {
