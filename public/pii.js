@@ -1036,41 +1036,19 @@
       }
     }
 
-    // Lowercase rare names in name-introducing positions. Catches narrative
-    // bypasses like "she said hi to lobar yesterday" without flagging every
-    // uncommon word a teacher might use. Only triggers when an unknown word
-    // appears *immediately after* a word that typically precedes a person's
-    // name. Each introducer gets its own pass so "paired with sherzod" still
-    // catches "sherzod" even though "paired with" was matched first.
-    const INTRODUCERS = [
-      'named', 'called', 'introduced', 'told', 'asked', 'helped', 'saw',
-      'met', 'greeted', 'spoke', 'talked', 'partnered', 'paired', 'hi',
-      'hello', 'hey', 'with', 'to', 'for', 'from', 'by', 'about',
-      'alongside', 'sat', 'next', 'beside', 'against', 'unlike', 'like',
-    ];
+    // High-confidence name-introducer patterns only. "named X" / "called X"
+    // are very strong signals that X is a person's name. Other prepositions
+    // (with, to, for…) are too ambiguous and produced false positives on
+    // ordinary teacher vocabulary, so they were removed.
+    const INTRODUCERS = ['named', 'called'];
     for (const intro of INTRODUCERS) {
-      const r = new RegExp('\\b' + intro + '\\s+([a-z]{4,15})\\b', 'gi');
+      const r = new RegExp('\\b' + intro + '\\s+([a-z]{3,15})\\b', 'gi');
       let nm;
       while ((nm = r.exec(text)) !== null) {
         const candidate = nm[1].toLowerCase();
         if (looksLikeEnglishWord(candidate)) continue;
-        // Word appears in a name-position and doesn't look like English.
         return { found: true, sample: nm[1], kind: 'name' };
       }
-    }
-
-    // Bare lowercase suspect words: also do a sweep for any lowercase 4+ char
-    // word that isn't in our safe lists AND doesn't look like English. This
-    // catches names that appear without an introducer ("the kid lobar tried").
-    for (const t of tokens) {
-      if (t.isCap) continue;
-      if (t.lower.length < 4) continue;
-      if (looksLikeEnglishWord(t.lower)) continue;
-      if (NAMES.has(t.lower)) {
-        return { found: true, sample: t.word, kind: 'name' };
-      }
-      // Not in dictionary, not English-looking — likely a rare name.
-      return { found: true, sample: t.word, kind: 'name' };
     }
 
     // Fallback: structural patterns for names not in the list.
