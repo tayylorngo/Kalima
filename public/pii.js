@@ -1175,6 +1175,10 @@
   // adjectives/verbs is not.
   function looksLikeEnglishWord(word) {
     if (!word || word.length < 4) return true;
+    // Contractions (doesn't, won't, can't, I'm, he'll, that's, etc.) — any
+    // word with an internal apostrophe is overwhelmingly an English
+    // contraction, not a name.
+    if (/['’]/.test(word)) return true;
     if (COMMON_WORDS.has(word)) return true;
     if (ALLOW.has(word)) return true;
     if (AMBIGUOUS_NAMES.has(word)) return true;
