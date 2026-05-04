@@ -721,6 +721,131 @@
     'word wore work world worm worn worse worst worth wound wove wrap ' +
     'wreck wrist write wrong wrote yacht yard yarn yawn year yell yes ' +
     'yet yield yoga yoke you young your youth zone zoo trouble issue tone ' +
+    // Common -le ending words (verbs and nouns)
+    'settle settles settled settling handle handles handled handling ' +
+    'single singled doubles doubled tripled couple couples coupled gentle ' +
+    'simple subtle subtler nimble humble ample sample samples sampled ' +
+    'sampling middle muddle muddles riddle riddles paddle paddles fiddle ' +
+    'fiddles juggle juggles juggled juggling buckle buckles buckled ' +
+    'cuddle cuddles cradle cradles cradled candle candles bundle bundles ' +
+    'bundled mingle mingles mingled jungle jungles tingle tangle tangles ' +
+    'tangled mangle dangle dangles jingle single singles bottle bottles ' +
+    'bottled people purple maple staple stable stables stabled cable ' +
+    'cables battle battles battled little brittle bottle title titles ' +
+    'mettle nettle rattle settle tattle scuttle struggle struggles ' +
+    'struggled struggling chuckle chuckles chuckled needle needles ' +
+    'eagle eagles giggle giggles wiggle wiggles bubble bubbles tickle ' +
+    'tickles wrinkle wrinkles fragile profile profiles temple temples ' +
+    'sample samples couple couples turtle turtles ladle ladles bridle ' +
+    'gentle simple subtle little marble marbles missile saddle ankle ' +
+    'angle angles uncle uncles example examples exemplary apple apples ' +
+    'idle puzzle puzzles pebble pebbles ' +
+    // -it / -dit / -bit ending base forms
+    'credit credits credited debit debits debited edit edits edited ' +
+    'profit profits profited audit audits audited habit habits limit ' +
+    'limits limited summit summits visit visits visited deposit deposits ' +
+    'exhibit exhibits exhibited orbit orbits orbited submit submits ' +
+    'admit admits admitted permit permits permitted commit commits ' +
+    'committed transit benefit benefits benefited ' +
+    // -et / -get / -ket / -let ending
+    'budget budgets target targets targeted market markets packet ' +
+    'packets ticket tickets basket baskets blanket blankets cricket ' +
+    'crickets racket pocket pockets locket lockets bucket buckets ' +
+    'gadget gadgets midget closet closets toilet toilets bullet ' +
+    'bullets fillet helmet helmets magnet magnets nugget nuggets ' +
+    'planet planets racket pellet trumpet violet ' +
+    // Common short adjectives / verbs / nouns
+    'talent talents talented agent agents fluent fluently fluency ' +
+    'urgent recent decent extent intent invent invents inventor patent ' +
+    'parent parents content silent moment current decent recent absent ' +
+    'present absent talent advent ardent latent silent salient ' +
+    'patient patiently impatient lenient potent potently constant ' +
+    'instant ' +
+    // Common 4-letter base verbs/nouns sometimes missed
+    'beam beams calm calmer dare dares dared dust dusty face faces ' +
+    'fail fails fade fades fall feet fish flag flat flew flow folk ' +
+    'gain gate gem gift glad glow goal grab grew grin gum hand harm ' +
+    'haul heap hide hike hint hold hole home hose hour howl hurt ' +
+    'icon idea inch iron item joke jump junk just keen kept kids ' +
+    'lamp leap left lend life lift lip live load lone loop loss loud ' +
+    'love loyal mad mark mass meal melt mend metal mid mighty mild ' +
+    'mile milk mind mode mold mood move mute name near neck nest net ' +
+    'nice node noon nope norm note now numb oath oats odds oh oil ok ' +
+    'old open opt orb our pace pack page pale palm pang pant park pat ' +
+    'path paw paid pay pear peer pen peg per pick pie pile pill pine ' +
+    'pink pit pity place plain plan plus point pole pond pool pop pose ' +
+    'post pour pouch pray prep pry pump punch ' +
+    // -age / -ate / -ode / -ave / -ide / -ase / -uce
+    'cage cages caged stage stages staged page pages paged image ' +
+    'images imaged passage message passages messages average averages ' +
+    'manage manages managed manager language languages bandage ' +
+    'damage damages damaged courage encourage encourages encouraged ' +
+    'storage usage village villages umbrage savage advantage outrage ' +
+    'engage engages engaged village villages voyage voyages cottage ' +
+    'leverage referee tease release leases ' +
+    // Common short words ending in vowels
+    'data area idea aria pasta vista delta omega panda polka koala ' +
+    'tundra zebra arena trauma lava panda piano radio audio video ' +
+    'patio ratio echo ' +
+    // -ent / -ant
+    'silent decent recent talent absent moment patent parent fluent ' +
+    'urgent constant instant pleasant elegant relevant elephant ' +
+    'distant brilliant tolerant ignorant abundant arrogant defiant ' +
+    'reliant compliant deviant expectant abundant repugnant ' +
+    'fragrant resonant militant pageant tenant gallant truant ' +
+    'fluent agent decent accent client extent intent invent intent ' +
+    'absent ardent latent talent ' +
+    // -ist / -ism / -ical / -ile / -ory
+    'mobile fertile hostile docile fragile agile profile missile ' +
+    'reptile textile sterile servile tactile nubile senile while ' +
+    'awhile docile crocodile theory victory factory glory story ' +
+    'memory hickory armory armory rhetoric topic logic ' +
+    // Misc common words
+    'piece pieces piano echo ratio audio video radio patio cargo ' +
+    'tempo extra major minor minor angel angels demon demons icon ' +
+    'icons extra major minor below above maybe perhaps soon ' +
+    'someday somebody somehow someone something somewhere ' +
+    'either neither always never seldom rarely barely hardly ' +
+    'merely simply truly really very quite fairly nearly almost ' +
+    'extra usual unusual normal abnormal regular irregular even odd ' +
+    'whole partial entire complete total partial brief lengthy ' +
+    'short long ' +
+    // More common nouns/verbs ending in -e (frequent false-positive risk)
+    'mistake mistakes choice choices voice voices juice juices price ' +
+    'prices place places phase phases case cases base bases space ' +
+    'spaces grace graces face faces race races pace paces brace ' +
+    'braces trace traces scope scopes type types stage stages page ' +
+    'pages lake lakes wave waves date dates note notes vote votes ' +
+    'mode modes role roles rule rules size sizes line lines fine ' +
+    'fines lane lanes mile miles file files time times tile tiles ' +
+    'wire wires fire fires hire hires share shares stare stares ' +
+    'rare rarely care cares cared spare spares scare scares prepare ' +
+    'prepares prepared compare compares declare declares aware ' +
+    'beware ware wares store stores score scores bore bores chore ' +
+    'chores core cores more before more therefore explore explores ' +
+    'restore restores ' +
+    // Common emotions/states
+    'anger fear pride peace guilt shame love hate joy thrill panic ' +
+    'shock awe ' +
+    // Common abstract nouns
+    'truth trust faith hope luck pride pride power force value ' +
+    'worth wealth health depth length width height growth youth ' +
+    'birth death faith oath path math myth ' +
+    // Common verbs in base form (3-4 chars)
+    'dare dared dares ease eases earn earns eats ends fall falls ' +
+    'feel feels gain gains halt halts hate hates hold holds idle ' +
+    'idles join joins jump jumps know knows lack lacks last lasts ' +
+    'lead leads lend lends look looks lose loses make makes meet ' +
+    'meets miss moves note notes pull pulls push pushes read reads ' +
+    'rest rests rise rises ruin ruins save saves seek seeks send ' +
+    'sends show shows skip skips stop stops take takes test tests ' +
+    'turn turns uses view views wait waits walk walks want wants ' +
+    'wash wear wears wins wish wishes work works ' +
+    // Common adverbs not yet covered
+    'nearly hardly barely merely truly really likely surely fully ' +
+    'totally simply purely solely lately freely loudly quietly ' +
+    'softly slowly quickly clearly easily widely briefly briefly ' +
+    'partly mostly mainly chiefly also only too soon early ' +
     'method effort sense detail intent action belief topic theme matter ' +
     'piece angle aim chance choice plan fault flaw idea hope nerve ' +
     'pride shame fault habit habit chore role ground level limit goal ' +
