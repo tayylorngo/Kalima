@@ -281,10 +281,6 @@ form.addEventListener('submit', async (e) => {
   const pii = detectPII(description);
   if (pii.found) {
     showPiiWarning(pii);
-    const label = PII_LABELS[pii.kind] || 'identifying info';
-    showError(
-      `Submission blocked: looks like a ${label} (“${pii.sample}”). Remove it, then try again.`
-    );
     descEl.focus();
     piiWarning.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
@@ -320,8 +316,9 @@ form.addEventListener('submit', async (e) => {
       if (data.pii && data.sample) {
         showPiiWarning({ kind: data.kind || 'name', sample: data.sample });
         piiWarning.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        showError(data.error || `Request failed (${res.status}).`);
       }
-      showError(data.error || `Request failed (${res.status}).`);
       return;
     }
     renderSuggestions(data.suggestions);
