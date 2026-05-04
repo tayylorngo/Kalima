@@ -261,6 +261,16 @@
     'tasneem tawfiq taymur thabit thurayya tisam toufik usama wael wahid ' +
     'wajdi waleed walid walida wasim widad widad wisam yaser yasin yasmin ' +
     'yasser yazan yazid yousef yousif yusra yusuf zahid zahir zahra zaid ' +
+    // Additional Central Asian / Arabic / South Asian names
+    'madina madinah karima kareema kareem aziza azizah aziz dilshoda ' +
+    'gulnoza gulchehra nodira sevara shahnoza munira zilola zamira ' +
+    'malika malek malik mansour marwan masoud mehdi mubarak mukhtor ' +
+    'nargiza shokhrukh sherzodbek shavkat tursun otabek bekzod ulugbek ' +
+    'rakhmat rashida rasmia roya rumana sadia sadiya sadia sara saoud ' +
+    'sabira sabriya safiya saida saima sajida saliha samiha samira sania ' +
+    'shaheen shahin shaheena shaina shakila shamima shamim sherzoda ' +
+    'shukria sumaya tahmina tahira tarana tasneem tehmina yasmeen yasmina ' +
+    'yusra zahirah zaina zainab zarina zoya zubaida zubeida ' +
     'zain zainab zaki zara zayd zayn zeena zeid zeina zeyad ziad ziya zubair ' +
     // African / African-diaspora names common in US schools
     'amaru ammon amari ayanna chinwe chioma deshawn ebele emeka folake ' +
@@ -341,8 +351,8 @@
     'asks','answers','reads','writes','speaks','listens','participates',
     'contributes','engages','focuses','struggles','excels','improves',
     'improved','progressed','progresses','gets','got','arrives','arrived',
-    'started','began','begins','tries','tried','should','must','could','may',
-    'might','will','would','can','cannot',
+    'started','began','begins','tried','should','must','could',
+    'might','would','cannot',
     // Common adverb / transition openers
     'hopefully','clearly','apparently','obviously','frequently','rarely',
     'occasionally','periodically','seldom','barely','hardly','nearly',
@@ -846,6 +856,26 @@
     'totally simply purely solely lately freely loudly quietly ' +
     'softly slowly quickly clearly easily widely briefly briefly ' +
     'partly mostly mainly chiefly also only too soon early ' +
+    // Specific common words found in production sweep
+    'pencil pencils pen pens crayon crayons marker markers eraser erasers ' +
+    'listen listens listened listening listener listeners shown showing ' +
+    'learn learns learned learnt learning learner learners away aside ' +
+    'arrives arrived arriving arrival arrivals leave leaves leaving ' +
+    'departs departed departing depart return returns returned returning ' +
+    'enter enters entered entering exit exits exited exiting ' +
+    'patience patient patiently impatient impatience grace gracious ' +
+    'unsafe unable unclear unfair unhappy unkind unsure unhelpful ' +
+    'untrue untidy untimely uneven unlike unsteady unwilling unwise ' +
+    'redo redid redone retry retried recheck recall reread rewrite rewrote ' +
+    'discount discontent discouraged disrupt disrupts disrupted disorganized ' +
+    'mislead misread mistaken misplaced misuse misused ' +
+    'overall oversee overcame overcome overcomes overall overreact ' +
+    'underline underlines underlined underlining underway undertaken ' +
+    'subpar subtopic subway suburban subtle ' +
+    'preplan prepared preview presort prerequisite ' +
+    'classmates classmate halls hallways halfway halftime headway ' +
+    'wholesome wholehearted wholly halt halts halted halting ' +
+    'thrives thrived thriving thrive ' +
     'method effort sense detail intent action belief topic theme matter ' +
     'piece angle aim chance choice plan fault flaw idea hope nerve ' +
     'pride shame fault habit habit chore role ground level limit goal ' +
@@ -977,8 +1007,31 @@
       }
 
       // Curated names list — case-insensitive. Catches "marcus", "Marcus",
-      // and "MARCUS".
+      // and "MARCUS". For names that are also common English words (patience,
+      // harper, hope, halle, etc.), require a strong name signal — same logic
+      // as AMBIGUOUS_NAMES — so we don't flag them on innocuous use.
       if (NAMES.has(t.lower)) {
+        if (looksLikeEnglishWord(t.lower)) {
+          // Treat as ambiguous: only flag with name context.
+          if (t.isCap && !isFirstWordOfSentence(text, t.index)) {
+            return { found: true, sample: t.word, kind: 'name' };
+          }
+          const after = text.slice(t.index + t.word.length);
+          if (/^['’]s\b/.test(after)) {
+            return { found: true, sample: t.word, kind: 'name' };
+          }
+          if (t.isCap && isFirstWordOfSentence(text, t.index)) {
+            if (
+              /^\s+(?:is|was|has|had|seems|seemed|tries|tried|works|worked|reads|read|writes|wrote|likes|loves|enjoys|enjoyed|struggles|struggled|excels|excelled|completed|completes|finishes|finished|earned|earns|received|asked|asks|answered|answers|understands|understood|comprehends|comprehended|improved|improves|started|began|gets|got|appears|shows|showed|demonstrates|demonstrated|participates|participated|contributes|contributed|engages|engaged|tends|tended|consistently|always|often|never|sometimes)\b/i.test(
+                after
+              )
+            ) {
+              return { found: true, sample: t.word, kind: 'name' };
+            }
+          }
+          continue;
+        }
+        // Confident name — not an English word.
         return { found: true, sample: t.word, kind: 'name' };
       }
     }
@@ -1090,12 +1143,18 @@
     // Embedded names in long compound tokens — catches bypass attempts like
     // "marcusisastudent" or "TheStudentMarcusIsHardworking". Scans tokens of
     // 8+ chars (well above typical English words) for name substrings of
-    // 5+ chars (long enough to avoid common-prefix collisions).
+    // 5+ chars. Skips tokens that look like ordinary English words to avoid
+    // false positives like "halle" inside "challenges".
     for (const t of tokens) {
       if (t.lower.length < 8) continue;
       if (ALLOW.has(t.lower)) continue;
       if (NAMES.has(t.lower)) continue;
       if (AMBIGUOUS_NAMES.has(t.lower)) continue;
+      // For tokens up to 15 chars (typical English word range), skip if it
+      // looks English. For tokens 16+ chars, always search — at that length
+      // it's almost certainly a deliberate compound, even if it ends in -ing
+      // or another suffix (e.g. "thestudentmarcusishardworking").
+      if (t.lower.length < 16 && looksLikeEnglishWord(t.lower)) continue;
       const found = findEmbeddedName(t.lower);
       if (found) {
         return {
